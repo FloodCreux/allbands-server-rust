@@ -49,6 +49,17 @@ impl TestApp {
             .await
             .expect("Failed to execute request")
     }
+
+    pub async fn get_artist_by_id(&self, id: uuid::Uuid) -> reqwest::Response {
+        let request = &format!("{}/artists/{}", &self.address, id);
+        dbg!(request);
+
+        self.api_client
+            .get(request)
+            .send()
+            .await
+            .expect("Failed to execute the request")
+    }
 }
 
 // Launch our application in the background ~somehow~

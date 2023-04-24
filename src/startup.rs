@@ -1,4 +1,4 @@
-use crate::routes::{create, health_check};
+use crate::routes::{create_artist, health_check, get_artist_by_id};
 use crate::configuration::{DatabaseSettings, Settings};
 use actix_web::dev::Server;
 use actix_web::web::Data;
@@ -69,7 +69,7 @@ async fn run(
     let db_pool = Data::new(db_pool);
 
     let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
-    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+    let message_store = CookieMessageStore::builder(secret_key).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
 
     let server = HttpServer::new(move || {
@@ -77,7 +77,8 @@ async fn run(
             .wrap(message_framework.clone())
             .wrap(TracingLogger::default())
             .route("/health", web::get().to(health_check))
-            .route("/artist", web::post().to(create))
+            .route("/artists", web::post().to(create_artist))
+            .route("/artists/{id}", web::get().to(get_artist_by_id))
             .app_data(db_pool.clone())
             .app_data(base_url.clone())
             .app_data(Data::new(HmacSecret(hmac_secret.clone())))
