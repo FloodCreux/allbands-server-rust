@@ -7,16 +7,16 @@ use uuid::Uuid;
 use chrono::Utc;
 
 #[derive(serde::Deserialize)]
-pub struct FormData {
+pub struct BodyData {
     name: String,
     sort_name: String,
     disambiguation: String,
 }
 
-impl TryFrom<FormData> for NewArtist {
+impl TryFrom<BodyData> for NewArtist {
     type Error = String;
 
-    fn try_from(value: FormData) -> Result<Self, Self::Error> {
+    fn try_from(value: BodyData) -> Result<Self, Self::Error> {
         let name = value.name;
         let sort_name = value.sort_name;
         let disambiguation = value.disambiguation;
@@ -66,18 +66,18 @@ pub fn error_chain_fmt(
 
 #[tracing::instrument(
     name = "Add new artist",
-    skip(form, pool),
+    skip(body, pool),
     fields(
-       artist_name = %form.name,
-       artist_sort_name = %form.sort_name,
-       artist_disambiguation = %form.disambiguation,
+       artist_name = %body.name,
+       artist_sort_name = %body.sort_name,
+       artist_disambiguation = %body.disambiguation,
     ),
 )]
 pub async fn create(
-    form: web::Form<FormData>,
+    body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, ArtistError> {
-    let new_artist = form.0.try_into().map_err(ArtistError::ValidationError)?;
+    let new_artist = body.0.try_into().map_err(ArtistError::ValidationError)?;
     let mut transaction = pool
         .begin()
         .await

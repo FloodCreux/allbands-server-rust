@@ -41,7 +41,14 @@ pub struct TestApp {
 }
 
 impl TestApp {
-
+    pub async fn post_artist(&self, body: serde_json::Value) -> reqwest::Response {
+        self.api_client
+            .post(&format!("{}/artists", &self.address))
+            .json(&body)
+            .send()
+            .await
+            .expect("Failed to execute request")
+    }
 }
 
 // Launch our application in the background ~somehow~
