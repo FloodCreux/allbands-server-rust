@@ -1,4 +1,4 @@
-use crate::routes::{create_artist, health_check, get_artist_by_id};
+use crate::routes::{create_artist, health_check, get_artist_by_id, update_artist};
 use crate::configuration::{DatabaseSettings, Settings};
 use actix_web::dev::Server;
 use actix_web::web::Data;
@@ -79,6 +79,7 @@ async fn run(
             .route("/health", web::get().to(health_check))
             .route("/artists", web::post().to(create_artist))
             .route("/artists/{id}", web::get().to(get_artist_by_id))
+            .route("/artists/{id}", web::put().to(update_artist))
             .app_data(db_pool.clone())
             .app_data(base_url.clone())
             .app_data(Data::new(HmacSecret(hmac_secret.clone())))

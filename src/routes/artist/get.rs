@@ -43,9 +43,11 @@ pub async fn get_artist_by_id(
     let result = Artist::find_by_id(id, &pool)
         .await
         .context("Failed to get artist")?;
+
     if result.is_none() {
         return Err(GetArtistError::NotFoundError);
     }
 
     Ok(HttpResponse::Ok().json(result))
 }
+

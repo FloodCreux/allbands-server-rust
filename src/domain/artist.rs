@@ -1,7 +1,7 @@
+use crate::domain::{NewArtist, UpdateArtist};
 use uuid::Uuid;
 use sqlx::{PgPool, Transaction, Postgres};
-
-use super::NewArtist;
+    
 
 #[derive(Debug, serde::Serialize,serde::Deserialize, sqlx::FromRow)]
 pub struct Artist {
@@ -65,6 +65,34 @@ impl Artist {
             .fetch_one(transaction)
             .await
             .expect("Failed to execute request");
+
+        Ok(entity)
+    }
+
+    #[tracing::instrument(
+        name = "Updating artist in the database",
+        skip(transaction, item)
+    )]
+    pub async fn update(
+        item: &UpdateArtist,
+        transaction: &mut Transaction<'_, Postgres>,
+    ) -> Result<Self, sqlx::Error> {
+        let entity = sqlx::query_as!(
+            Artist,
+            r#"
+            UPDATE artists
+            SET name = $1, sort_name = $2, disambiguation = $3
+            WHERE id = $4
+            RETURNING id, name, sort_name, disambiguation
+            "#,
+            &item.name.as_ref(),
+            &item.sort_name,
+            &item.disambiguation,
+            &item.id,
+        )
+        .fetch_one(transaction)
+        .await
+        .expect("Failed to execute request");
 
         Ok(entity)
     }

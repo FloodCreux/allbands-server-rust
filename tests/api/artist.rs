@@ -116,3 +116,53 @@ async fn get_artist_returns_200_ok() {
         artist_id
     );
 }
+
+#[tokio::test]
+async fn update_artist_returns_200_ok() {
+    // Arrange
+    let app = spawn_app().await;
+
+    let response = app.post_artist(serde_json::json!({
+        "name": "Billy Strnigs",
+        "sort_name": "Strnigs, Billy",
+        "disambiguation": "Bluegras",
+    }))
+    .await;
+
+    // Assert - Part 1 - Create a new artist
+    assert_eq!(
+        201,
+        response.status().as_u16(),
+        "The API did not succeed to create a new Artist"
+    );
+
+    let artist_id = response.json::<Artist>()
+        .await
+        .expect("Failed to parse response")
+        .id;
+
+    // Act
+   let response = app.update_artist(artist_id, serde_json::json!({
+        "id": artist_id,
+        "name": "Billy Strings",
+        "sort_name": "Strings, Billy",
+        "disambiguation": "Bluegrass",
+    }))
+    .await;
+
+    // Assert - Part 2 - Update the artist
+    assert_eq!(
+        200,
+        response.status().as_u16(),
+        "The API did not return a 200 OK for {}",
+        artist_id
+    );
+
+    let artist = response.json::<Artist>()
+        .await
+        .expect("Failed to parse response");
+
+    assert_eq!("Billy Strings", artist.name);
+    assert_eq!("Strings, Billy", artist.sort_name);
+    assert_eq!("Bluegrass", artist.disambiguation);
+}

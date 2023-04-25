@@ -51,11 +51,17 @@ impl TestApp {
     }
 
     pub async fn get_artist_by_id(&self, id: uuid::Uuid) -> reqwest::Response {
-        let request = &format!("{}/artists/{}", &self.address, id);
-        dbg!(request);
-
         self.api_client
-            .get(request)
+            .get(&format!("{}/artists/{}", &self.address, id))
+            .send()
+            .await
+            .expect("Failed to execute the request")
+    }
+
+    pub async fn update_artist(&self, id: uuid::Uuid, body: serde_json::Value) -> reqwest::Response {
+        self.api_client
+            .put(&format!("{}/artists/{}", &self.address, id))
+            .json(&body)
             .send()
             .await
             .expect("Failed to execute the request")
