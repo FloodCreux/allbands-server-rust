@@ -1,9 +1,11 @@
 use crate::configuration::{ApplicationSettings, DatabaseSettings, Environment};
+use secrecy::Secret;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub redis_uri: Secret<String>
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {

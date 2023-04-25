@@ -1,5 +1,7 @@
 use crate::routes::{create_artist, health_check, get_artist_by_id, update_artist};
 use crate::configuration::{DatabaseSettings, Settings};
+use actix_session::SessionMiddleware;
+use actix_session::storage::RedisSessionStore;
 use actix_web::dev::Server;
 use actix_web::web::Data;
 use actix_web::cookie::Key;
@@ -33,6 +35,7 @@ impl Application {
             connection_pool, 
             configuration.application.base_url,
             configuration.application.hmac_secret,
+            configuration.redis_uri,
             ).await?;
 
         Ok(Self { port, server })
@@ -64,17 +67,23 @@ async fn run(
     db_pool: PgPool,
     base_url: String,
     hmac_secret: Secret<String>,
+    redis_uri: Secret<String>,
 ) -> Result<Server, anyhow::Error> {
     let base_url = Data::new(ApplicationBaseUrl(base_url));
     let db_pool = Data::new(db_pool);
 
     let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
-    let message_store = CookieMessageStore::builder(secret_key).build();
+    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
+    let redis_store = RedisSessionStore::new(redis_uri.expose_secret()).await?;
 
     let server = HttpServer::new(move || {
         App::new()
             .wrap(message_framework.clone())
+            .wrap(SessionMiddleware::new(
+                redis_store.clone(),
+                secret_key.clone(),
+            ))
             .wrap(TracingLogger::default())
             .route("/health", web::get().to(health_check))
             .route("/artists", web::post().to(create_artist))
