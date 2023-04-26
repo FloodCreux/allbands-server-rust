@@ -35,7 +35,7 @@ impl Concert {
             item.artist_id,
             item.venue.as_ref(),
             item.city.as_ref(),
-            item.state,
+            item.state.as_ref(),
             item.country,
             item.date,
             chrono::Utc::now(),

@@ -2,7 +2,9 @@ use crate::{
     domain::{
         Concert, 
         NewConcert, 
-        ConcertVenue
+        ConcertVenue,
+        ConcertCity,
+        ConcertState,
     }, 
     routes::error_chain_fmt
 };
@@ -16,7 +18,7 @@ pub struct CreateConcertRequest {
     pub artist_id: uuid::Uuid,
     pub venue: String,
     pub city: String,
-    pub state: Option<String>,
+    pub state: String,
     pub country: String,
     pub date: chrono::NaiveDate,
 }
@@ -27,8 +29,8 @@ impl TryFrom<CreateConcertRequest> for NewConcert {
     fn try_from(value: CreateConcertRequest) -> Result<Self, Self::Error> {
         let artist_id = value.artist_id;
         let venue = ConcertVenue::parse(value.venue)?;
-        let city = value.city;
-        let state = value.state;
+        let city = ConcertCity::parse(value.city)?;
+        let state = ConcertState::parse(value.state)?;
         let country = value.country;
         let date = value.date;
 
