@@ -36,8 +36,8 @@ impl Concert {
             item.venue.as_ref(),
             item.city.as_ref(),
             item.state.as_ref(),
-            item.country,
-            item.date,
+            item.country.as_ref(),
+            item.date.as_ref(),
             chrono::Utc::now(),
         )
         .fetch_one(transaction)

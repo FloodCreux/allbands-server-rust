@@ -5,6 +5,8 @@ use crate::{
         ConcertVenue,
         ConcertCity,
         ConcertState,
+        ConcertDate,
+        ConcertCountry,
     }, 
     routes::error_chain_fmt
 };
@@ -20,7 +22,7 @@ pub struct CreateConcertRequest {
     pub city: String,
     pub state: String,
     pub country: String,
-    pub date: chrono::NaiveDate,
+    pub date: String,
 }
 
 impl TryFrom<CreateConcertRequest> for NewConcert {
@@ -31,8 +33,8 @@ impl TryFrom<CreateConcertRequest> for NewConcert {
         let venue = ConcertVenue::parse(value.venue)?;
         let city = ConcertCity::parse(value.city)?;
         let state = ConcertState::parse(value.state)?;
-        let country = value.country;
-        let date = value.date;
+        let country = ConcertCountry::parse(value.country)?;
+        let date = ConcertDate::parse(value.date)?;
 
         Ok(Self {
             artist_id,

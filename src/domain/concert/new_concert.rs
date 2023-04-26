@@ -1,4 +1,4 @@
-use super::{ConcertVenue, ConcertCity, ConcertState};
+use super::{ConcertVenue, ConcertCity, ConcertState, ConcertDate, ConcertCountry};
 
 
 #[derive(serde::Deserialize)]
@@ -7,6 +7,6 @@ pub struct NewConcert {
     pub venue: ConcertVenue,
     pub city: ConcertCity,
     pub state:ConcertState,
-    pub country: String,
-    pub date: chrono::NaiveDate
+    pub country: ConcertCountry,
+    pub date: ConcertDate,
 }
