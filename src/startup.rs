@@ -1,12 +1,13 @@
 use crate::routes::{
     create_artist, 
     health_check, 
-    get_artist_by_id, 
+    artist_dashboard, 
     update_artist, 
     create_concert,
     get_concert, 
     update_concert, 
-    get_concerts,
+    get_concerts, 
+    artists_dashboard,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use actix_session::SessionMiddleware;
@@ -95,8 +96,9 @@ async fn run(
             ))
             .wrap(TracingLogger::default())
             .route("/health", web::get().to(health_check))
+            .route("/artists/dashboard", web::get().to(artists_dashboard))
             .route("/artists", web::post().to(create_artist))
-            .route("/artists/{id}", web::get().to(get_artist_by_id))
+            .route("/artists/{id}", web::get().to(artist_dashboard))
             .route("/artists/{id}", web::put().to(update_artist))
             .route("/concerts", web::post().to(create_concert))
             .route("/concerts", web::get().to(get_concerts))

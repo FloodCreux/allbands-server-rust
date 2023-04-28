@@ -3,7 +3,7 @@ use uuid::Uuid;
 use sqlx::{PgPool, Transaction, Postgres};
     
 
-#[derive(Debug, serde::Serialize,serde::Deserialize, sqlx::FromRow)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct Artist {
     pub id: Uuid,
     pub name: String,
@@ -95,5 +95,25 @@ impl Artist {
         .expect("Failed to execute request");
 
         Ok(entity)
+    }
+
+    #[tracing::instrument(
+        name = "Find all artists",
+        skip(pool)
+    )]
+    pub async fn find_all(pool: &PgPool) -> Result<Vec<Self>, sqlx::Error> {
+        let entities = sqlx::query_as!(
+            Artist,
+            r#"
+            SELECT id, name, sort_name, disambiguation
+            FROM artists
+            ORDER BY name ASC
+            "#,
+        )
+        .fetch_all(pool)
+        .await
+        .expect("Failed to execute request");
+
+        Ok(entities)
     }
 }

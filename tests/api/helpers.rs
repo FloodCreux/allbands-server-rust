@@ -123,14 +123,14 @@ pub async fn spawn_app() -> TestApp {
         .build()
         .unwrap();
 
-    let test_app = TestApp {
+    
+
+    TestApp {
         address,
         port: application_port,
         db_pool: get_connection_pool(&configuration.database),
         api_client: client,
-    };
-
-    test_app
+    }
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
