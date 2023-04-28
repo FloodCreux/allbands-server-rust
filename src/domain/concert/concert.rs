@@ -1,4 +1,5 @@
-use crate::domain::NewConcert;
+use crate::domain::{NewConcert, UpdateConcert};
+use anyhow::Context;
 use sqlx::{Postgres, Transaction};
 
 
@@ -32,17 +33,93 @@ impl Concert {
             RETURNING id, artist_id, venue, city, state, country, date
             "#,
             concert_id,
-            item.artist_id,
-            item.venue.as_ref(),
-            item.city.as_ref(),
-            item.state.as_ref(),
-            item.country.as_ref(),
-            item.date.as_ref(),
+            &item.artist_id,
+            &item.venue.as_ref(),
+            &item.city.as_ref(),
+            &item.state.as_ref(),
+            &item.country.as_ref(),
+            &item.date.as_ref(),
             chrono::Utc::now(),
         )
         .fetch_one(transaction)
         .await
         .expect("Failed to insert concert");
+
+        Ok(entity)
+    }
+
+    #[tracing::instrument(
+        name = "Find all concerts",
+        skip(pool)
+    )]
+    pub async fn find_all(pool: &sqlx::PgPool) -> Result<Vec<Self>, sqlx::Error> {
+        let entities = sqlx::query_as!(
+            Self,
+            r#"
+            SELECT id, artist_id, venue, city, state, country, date
+            FROM concerts
+            ORDER BY date
+            "#,
+        )
+        .fetch_all(pool)
+        .await?
+        .into_iter()
+        .collect();
+
+        Ok(entities)
+    }
+
+    #[tracing::instrument(
+        name = "Find a concert by id",
+        skip(id, pool)
+    )]
+    pub async fn find_by_id(
+        id: uuid::Uuid,
+        pool: &sqlx::PgPool,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let entity = sqlx::query_as!(
+            Concert,
+            r#"
+            SELECT id, artist_id, venue, city, state, country, date
+            FROM concerts
+            WHERE id = $1
+            "#,
+            id,
+        )
+        .fetch_optional(pool)
+        .await
+        .expect("Failed to find concert");
+
+        Ok(entity)
+    }
+
+    #[tracing::instrument(
+        name = "Update Concert",
+        skip(item, transaction)
+    )]
+    pub async fn update(
+        item: &UpdateConcert,
+        transaction: &mut Transaction<'_, Postgres>,
+    ) -> Result<Self, sqlx::Error> {
+        let entity = sqlx::query_as!(
+            Concert,
+            r#"
+            UPDATE concerts
+            SET artist_id = $1, venue = $2, city = $3, state = $4, country = $5, date = $6
+            WHERE id = $7
+            RETURNING id, artist_id, venue, city, state, country, date
+            "#,
+            &item.artist_id,
+            &item.venue.as_ref(),
+            &item.city.as_ref(),
+            &item.state.as_ref(),
+            &item.country.as_ref(),
+            &item.date.as_ref(),
+            &item.id,
+        )
+        .fetch_one(transaction)
+        .await
+        .expect("Failed to update concert");
 
         Ok(entity)
     }

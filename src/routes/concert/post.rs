@@ -89,5 +89,7 @@ pub async fn create_concert(
         .await
         .context("Failed to insert a new concert")?;
 
+    transaction.commit().await.context("Failed to commit transaction")?;
+
     Ok(HttpResponse::Created().json(&concert))
 }

@@ -1,7 +1,7 @@
 use allbands::{
     configuration::{get_configuration, DatabaseSettings},
     startup::{Application, get_connection_pool},
-    telemetry::{get_subscriber, init_subscriber}, domain::Artist,
+    telemetry::{get_subscriber, init_subscriber},
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
@@ -74,6 +74,23 @@ impl TestApp {
             .send()
             .await
             .expect("Failed to execute request")
+    }
+
+    pub async fn get_concert_by_id(&self, id: uuid::Uuid) -> reqwest::Response {
+        self.api_client
+            .get(&format!("{}/concerts/{}", &self.address, id))
+            .send()
+            .await
+            .expect("Failed to execute the request")
+    }
+
+    pub async fn update_concert(&self, id: uuid::Uuid, body: serde_json::Value) -> reqwest::Response {
+        self.api_client
+            .put(&format!("{}/concerts/{}", &self.address, id))
+            .json(&body)
+            .send()
+            .await
+            .expect("Failed to execute the request")
     }
 }
 

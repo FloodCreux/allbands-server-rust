@@ -1,4 +1,13 @@
-use crate::routes::{create_artist, health_check, get_artist_by_id, update_artist, create_concert};
+use crate::routes::{
+    create_artist, 
+    health_check, 
+    get_artist_by_id, 
+    update_artist, 
+    create_concert,
+    get_concert, 
+    update_concert, 
+    get_concerts,
+};
 use crate::configuration::{DatabaseSettings, Settings};
 use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
@@ -90,6 +99,9 @@ async fn run(
             .route("/artists/{id}", web::get().to(get_artist_by_id))
             .route("/artists/{id}", web::put().to(update_artist))
             .route("/concerts", web::post().to(create_concert))
+            .route("/concerts", web::get().to(get_concerts))
+            .route("/concerts/{id}", web::get().to(get_concert))
+            .route("/concerts/{id}", web::put().to(update_concert))
             .app_data(db_pool.clone())
             .app_data(base_url.clone())
             .app_data(Data::new(HmacSecret(hmac_secret.clone())))
