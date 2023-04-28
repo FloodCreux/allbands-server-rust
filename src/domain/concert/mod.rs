@@ -1,4 +1,4 @@
-mod concert;
+mod entity;
 mod new_concert;
 mod concert_venue;
 mod concert_city;
@@ -7,7 +7,7 @@ mod concert_date;
 mod concert_country;
 mod update_concert;
 
-pub use concert::*;
+pub use entity::*;
 pub use new_concert::*;
 pub use concert_venue::*;
 pub use concert_city::*;

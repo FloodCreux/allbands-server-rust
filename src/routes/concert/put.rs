@@ -81,7 +81,7 @@ pub async fn update_concert(
     pool: web::Data<PgPool>
 ) -> Result<HttpResponse, UpdateConcertError> {
     let concert = UpdateConcert::try_from(item.into_inner())
-        .map_err(|e| UpdateConcertError::ValidationError(e))?;
+        .map_err(UpdateConcertError::ValidationError)?;
 
     if concert.id != *id {
         return Err(UpdateConcertError::ValidationError(

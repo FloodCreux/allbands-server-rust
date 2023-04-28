@@ -68,7 +68,7 @@ pub async fn update_artist(
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, UpdateArtistError> {
     let artist = UpdateArtist::try_from(artist.into_inner())
-        .map_err(|e| UpdateArtistError::ValidationError(e))?;
+        .map_err(UpdateArtistError::ValidationError)?;
     if artist.id != *id {
         return Err(UpdateArtistError::ValidationError(
             "The artist id in the path does not match the artist id in the body".to_string(),
